@@ -21,11 +21,13 @@ public class conexao {
     }
 
     public static void createTable() {
-        String sql = "    CREATE TABLE IF NOT EXISTS usuarios (\n" +
-                "        id BIGINT AUTO_INCREMENT PRIMARY KEY,\n" +
-                "        nome VARCHAR(150) NOT NULL,\n" +
-                "        email VARCHAR(150) NOT NULL\n" +
-                "    )\n";
+        String sql = "CREATE TABLE IF NOT EXISTS entidade (\n" +
+                "    id INT PRIMARY KEY,\n" +
+                "    nome VARCHAR(150) NOT NULL,\n" +
+                "    ano INT NOT NULL,\n" +
+                "    plataforma VARCHAR(100) NOT NULL,\n" +
+                "    genero VARCHAR(100) NOT NULL\n" +
+                ")";
 
         try (Connection conn = conectar();
              Statement stmt = conn.createStatement()){
