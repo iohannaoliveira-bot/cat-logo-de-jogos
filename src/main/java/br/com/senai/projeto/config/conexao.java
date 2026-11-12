@@ -1,3 +1,5 @@
+// Adicionar Listagem e consulta (Read)
+
 package br.com.senai.projeto.config;
 
 import java.sql.*;
