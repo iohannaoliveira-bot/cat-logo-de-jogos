@@ -1,4 +1,4 @@
-// Adicionar Listagem e consulta (Read)
+
 
 package br.com.senai.projeto.config;
 
@@ -6,7 +6,7 @@ import java.sql.*;
 
 public class conexao {
     private static final String URL =
-            "jdbc:h2:file:./data/banco";
+            "jdbc:h2:file:C:\\Users\\maria_ittner.EDU_FIESC\\IdeaProjects\\cat-logo-de-jogos\\data\\banco";
 
     private static final String USUARIO = "sa";
     private static final String SENHA = "";

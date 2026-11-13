@@ -1,3 +1,4 @@
+// Adicionar Edição (Update)
 
 package br.com.senai.projeto.dao;
 
@@ -8,25 +9,86 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class entidadeDAO {
+
+    private static final Object ID_LOCK = new Object();
 
     public void cadastrar(Entidade entidade) {
         String sql = "INSERT INTO entidade (id, nome, ano, plataforma, genero) VALUES (?, ?, ?, ?, ?)";
 
+        synchronized (ID_LOCK) {
+            try (Connection conn = conexao.conectar()) {
+                if (entidade.getId() <= 0) {
+                    try (PreparedStatement idStmt = conn.prepareStatement(
+                            "SELECT COALESCE(MAX(id), 0) + 1 FROM entidade");
+                         ResultSet rs = idStmt.executeQuery()) {
+                        rs.next();
+                        entidade.setId(rs.getInt(1));
+                    }
+                }
+
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, entidade.getId());
+                    stmt.setString(2, entidade.getNome());
+                    stmt.setInt(3, entidade.getAno());
+                    stmt.setString(4, entidade.getPlataforma());
+                    stmt.setString(5, entidade.getGenero());
+
+                    stmt.executeUpdate();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("Erro ao cadastrar entidade: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    public List<Entidade> listarTodas() {
+        String sql = "SELECT id, nome, ano, plataforma, genero FROM entidade ORDER BY id";
+        List<Entidade> entidades = new ArrayList<>();
+
+        try (Connection conn = conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                entidades.add(new Entidade(
+                        rs.getInt("id"),
+                        rs.getString("nome"),
+                        rs.getInt("ano"),
+                        rs.getString("plataforma"),
+                        rs.getString("genero")
+                ));
+            }
+            return entidades;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar entidades: " + e.getMessage(), e);
+        }
+    }
+
+    public Entidade buscarPorId(int id) {
+        String sql = "SELECT id, nome, ano, plataforma, genero FROM entidade WHERE id = ?";
+
         try (Connection conn = conexao.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
 
-            stmt.setInt(1, entidade.getId());
-            stmt.setString(2, entidade.getNome());
-            stmt.setInt(3, entidade.getAno());
-            stmt.setString(4, entidade.getPlataforma());
-            stmt.setString(5, entidade.getGenero());
-
-            stmt.executeUpdate();
-
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Entidade(
+                            rs.getInt("id"),
+                            rs.getString("nome"),
+                            rs.getInt("ano"),
+                            rs.getString("plataforma"),
+                            rs.getString("genero")
+                    );
+                }
+                return null;
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao cadastrar entidade: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao buscar entidade: " + e.getMessage(), e);
         }
     }
 
@@ -74,6 +136,44 @@ public class entidadeDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao consultar entidade: " + e.getMessage(), e);
+        }
+    }
+    public void atualizar(Entidade entidade) {
+        String sql = "UPDATE entidade SET nome = ?, ano = ?, plataforma = ?, genero = ? WHERE id = ?";
+
+        try (Connection conn = conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, entidade.getNome());
+            stmt.setInt(2, entidade.getAno());
+            stmt.setString(3, entidade.getPlataforma());
+            stmt.setString(4, entidade.getGenero());
+            stmt.setInt(5, entidade.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Entidade atualizada com sucesso.");
+            } else {
+                System.out.println("Nenhuma entidade encontrada com o ID fornecido.");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar entidade: " + e.getMessage(), e);
+        }
+    }
+    public void excluir(int id) {
+        String sql = "DELETE FROM entidade WHERE id = ?";
+        try (Connection conn = conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Entidade excluída com sucesso.");
+            } else {
+                System.out.println("Nenhuma entidade encontrada com o ID fornecido.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir entidade: " + e.getMessage(), e);
         }
     }
 }
