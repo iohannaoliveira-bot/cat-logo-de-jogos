@@ -139,5 +139,21 @@ public class entidadeDAO {
             throw new RuntimeException("Erro ao atualizar entidade: " + e.getMessage(), e)
                     ;
         }
+
+    }
+    public void excluir(int id) {
+        String sql = "DELETE FROM entidade WHERE id = ?";
+        try (Connection conn = conexao.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Entidade excluída com sucesso.");
+            } else {
+                System.out.println("Nenhuma entidade encontrada com o ID fornecido.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir entidade: " + e.getMessage(), e);
+        }
     }
 }

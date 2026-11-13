@@ -1,12 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="br.com.senai.projeto.dao.JogoDAO" %>
+<%@ page import="br.com.senai.projeto.dao.entidadeDAO" %>
 
 <%
     if ("POST".equalsIgnoreCase(request.getMethod())) {
 
         int id = Integer.parseInt(request.getParameter("id"));
 
-        JogoDAO dao = new JogoDAO();
+        entidadeDAO dao = new entidadeDAO();
         dao.excluir(id);
 
         response.sendRedirect("listagem.jsp");
